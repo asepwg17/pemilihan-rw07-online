@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pemilihan RW 07 Desa Kepongpongan (Online Real-Time)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printableBeritaAcara, #printableBeritaAcara * {
+                visibility: visible;
+            }
+            #printableBeritaAcara {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 20px;
+                background: white !important;
+                box-shadow: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-50 text-slate-800 flex flex-col justify-between">
+
+    <!-- Custom Modal for Alerts/Messages (High z-index to stay on top) -->
+    <div id="modalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-95 opacity-0" id="modalContainer">
+            <div class="flex items-center space-x-3 mb-4">
+                <div id="modalIconBg" class="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600">
+                    <i id="modalIcon" class="fa-solid fa-check text-lg"></i>
+                </div>
+                <h3 id="modalTitle" class="text-lg font-bold text-slate-900">Informasi</h3>
+            </div>
+            <p id="modalMessage" class="text-slate-600 mb-6 leading-relaxed">Pesan notifikasi...</p>
+            <div class="flex justify-end space-x-3">
+                <button id="modalCancelBtn" class="hidden px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-medium transition">Batal</button>
+                <button id="modalConfirmBtn" class="px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition">Mengerti</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-emerald-800 text-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-xl bg-emerald-700 border border-emerald-600 flex items-center justify-center shadow-inner">
+                    <i class="fa-solid fa-landmark text-2xl text-amber-400"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">PEMILIHAN RW 07 (ONLINE)</h1>
+                    <p class="text-xs text-emerald-200">Desa Kepongpongan, Kec. Talun, Kab. Cirebon</p>
+                </div>
+            </div>
+
+            <!-- Role & Navigation Bar -->
+            <div class="flex flex-wrap items-center gap-2">
+                <div id="connectionStatus" class="hidden items-center space-x-1.5 bg-emerald-950 px-3 py-1.5 rounded-xl border border-emerald-700 text-xs font-semibold text-emerald-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Online Terhubung</span>
+                </div>
+                <div id="userRoleBadge" class="hidden items-center space-x-2 bg-emerald-900/80 px-3 py-1.5 rounded-xl border border-emerald-700 text-xs font-semibold text-amber-300">
+                    <i id="roleBadgeIcon" class="fa-solid fa-user"></i>
+                    <span id="roleBadgeText">Pemilih</span>
+                </div>
+                <button id="logoutBtn" class="hidden px-3 py-1.5 rounded-xl bg-rose-600/80 hover:bg-rose-700 text-white text-xs font-medium transition items-center space-x-1">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Keluar</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- AUTH VIEW (LOGIN SELECTION) -->
+        <section id="view-auth" class="max-w-md mx-auto py-12">
+            <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-200 space-y-6">
+                <div class="text-center space-y-2">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-inner">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900">Portal E-Voting Cloud RW 07</h2>
+                    <p class="text-xs text-slate-500">Pilih akses masuk untuk melakukan voting atau panel panitia.</p>
+                </div>
+
+                <div class="space-y-3 pt-2">
+                    <button id="btnOpenVoterLogin" class="w-full p-4 rounded-2xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 font-bold flex items-center justify-between transition group shadow-sm">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md">
+                                <i class="fa-solid fa-person-booth"></i>
+                            </div>
+                            <div class="text-left">
+                                <span class="block text-sm">Akses Pemilih Warga</span>
+                                <span class="text-[11px] font-normal text-emerald-700">Masuk menggunakan NIK terdaftar di DPT</span>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-emerald-600 group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+
+                    <button id="btnOpenAdminLogin" class="w-full p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold flex items-center justify-between transition group shadow-sm">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-slate-800 text-white flex items-center justify-center shadow-md">
+                                <i class="fa-solid fa-user-gear"></i>
+                            </div>
+                            <div class="text-left">
+                                <span class="block text-sm">Akses Panitia / Admin</span>
+                                <span class="text-[11px] font-normal text-slate-500">Kelola kandidat, DPT, dan hasil suara cloud</span>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-400 group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- VOTER PORTAL VIEW -->
+        <section id="view-voter-portal" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 max-w-3xl mx-auto">
+                <div class="text-center pb-6 border-b border-slate-100">
+                    <span class="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold text-xs tracking-wider uppercase mb-2">Bilik Suara Elektronik Warga</span>
+                    <h2 id="voterPortalGreeting" class="text-2xl font-bold text-slate-900">Selamat Datang, Warga RW 07</h2>
+                    <p class="text-slate-500 text-sm mt-1">Gunakan hak pilih Anda dengan bijak untuk kemajuan Desa Kepongpongan.</p>
+                </div>
+
+                <!-- Ballot Step -->
+                <div id="voteStepBallot" class="py-6 space-y-6">
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-emerald-700 uppercase tracking-wide">Pemilih Aktif</span>
+                            <h4 id="loggedInVoterName" class="text-base font-bold text-emerald-900">-</h4>
+                            <p id="loggedInVoterInfo" class="text-xs text-emerald-600">-</p>
+                        </div>
+                        <span class="text-xs font-semibold bg-white px-3 py-1.5 rounded-xl border border-emerald-200 text-emerald-800"><i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> Terverifikasi</span>
+                    </div>
+
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800 mb-4 text-center">Silakan Pilih 1 Calon Ketua RW 07 (Periode 2026-2030):</h3>
+                        <div id="ballotCandidatesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Ballot options injected here -->
+                        </div>
+                    </div>
+
+                    <div class="pt-4 flex justify-center">
+                        <button disabled id="submitVoteBtn" class="px-8 py-3.5 bg-slate-300 text-slate-500 font-bold rounded-2xl cursor-not-allowed transition shadow-sm w-full sm:w-auto">
+                            <i class="fa-solid fa-paper-plane mr-2"></i> Kirim Suara Pilihan Saya
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Success Step -->
+                <div id="voteStepSuccess" class="py-12 text-center space-y-4 hidden">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-900">Suara Anda Berhasil Direkam ke Cloud!</h3>
+                    <p class="text-slate-600 max-w-md mx-auto text-sm">Terima kasih telah berpartisipasi dalam pemilihan Ketua RW 07 Desa Kepongpongan.</p>
+                    <div class="pt-4">
+                        <button id="successLogoutBtn" class="px-6 py-2.5 bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 transition text-sm">
+                            Keluar / Selesai
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ADMIN PORTAL VIEW -->
+        <section id="view-admin-portal" class="space-y-6 hidden">
+            <!-- Admin Navigation Tabs -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-gauge"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base">Panel Kontrol Panitia RW 07</h3>
+                        <p class="text-xs text-slate-500">Administrator / Database Cloud Terhubung</p>
+                    </div>
+                </div>
+                <nav class="flex items-center space-x-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+                    <button id="admin-nav-candidates" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition bg-white text-emerald-900 shadow-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-users"></i>
+                        <span>Kandidat</span>
+                    </button>
+                    <button id="admin-nav-results" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition text-slate-600 hover:text-slate-900 flex items-center space-x-2">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Quick Count</span>
+                    </button>
+                    <button id="admin-nav-voters" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition text-slate-600 hover:text-slate-900 flex items-center space-x-2">
+                        <i class="fa-solid fa-id-card"></i>
+                        <span>DPT</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- ADMIN TAB 1: KANDIDAT -->
+            <div id="admin-tab-candidates" class="space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900">Kelola Kandidat Calon RW 07</h2>
+                        <p class="text-slate-500 text-sm mt-1">Tambah, ubah, atau hapus data calon ketua RW secara online.</p>
+                    </div>
+                    <div>
+                        <button id="btnAddCandidate" class="px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 shadow-md shadow-emerald-600/15 flex items-center space-x-2 text-sm transition">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>Tambah Kandidat</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="adminCandidatesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Dynamic admin candidates -->
+                </div>
+            </div>
+
+            <!-- ADMIN TAB 2: RESULTS -->
+            <div id="admin-tab-results" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                        <div>
+                            <span class="inline-block px-3 py-1 rounded-full bg-amber-50 text-amber-700 font-semibold text-xs tracking-wider uppercase mb-1">Real-Time Cloud Count</span>
+                            <h2 class="text-2xl font-bold text-slate-900">Hasil Perhitungan Suara RW 07</h2>
+                            <p class="text-slate-500 text-sm mt-0.5">Rekapitulasi resmi panitia secara online.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button id="btnResetVotes" class="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-medium rounded-xl text-sm transition flex items-center space-x-2 border border-rose-200 shadow-sm">
+                                <i class="fa-solid fa-rotate-right"></i>
+                                <span>Reset Suara</span>
+                            </button>
+                            <button id="btnOpenBeritaAcara" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm transition flex items-center space-x-2 shadow-md shadow-emerald-600/15">
+                                <i class="fa-solid fa-file-lines"></i>
+                                <span>Preview & Cetak Berita Acara</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 my-6">
+                        <div class="bg-slate-50 border border-slate-200/80 p-5 rounded-2xl flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-users-rectangle"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-semibold text-slate-500 uppercase">Total Pemilih (DPT)</p>
+                                <h3 id="statTotalDpt" class="text-2xl font-bold text-slate-900">0</h3>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200/80 p-5 rounded-2xl flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-square-poll-vertical"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-semibold text-slate-500 uppercase">Suara Masuk</p>
+                                <h3 id="statTotalVoted" class="text-2xl font-bold text-slate-900">0</h3>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200/80 p-5 rounded-2xl flex items-center space-x-4">
+                            <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-semibold text-slate-500 uppercase">Partisipasi Warga</p>
+                                <h3 id="statTurnout" class="text-2xl font-bold text-slate-900">0%</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Result Bars -->
+                    <div class="space-y-6 pt-4" id="resultsBarsContainer">
+                        <!-- Dynamic result bars -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN TAB 3: VOTERS / DPT -->
+            <div id="admin-tab-voters" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900">Daftar Pemilih Tetap (DPT) RW 07</h2>
+                            <p class="text-slate-500 text-sm mt-0.5">Kelola data warga yang berhak memilih secara online.</p>
+                        </div>
+                        <div>
+                            <button id="btnAddVoter" class="px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 shadow-md shadow-emerald-600/15 flex items-center space-x-2 text-sm transition">
+                                <i class="fa-solid fa-user-plus"></i>
+                                <span>Tambah Warga DPT</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="my-4 flex flex-col sm:flex-row gap-3">
+                        <div class="relative flex-grow">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-search"></i>
+                            </span>
+                            <input type="text" id="voterSearchInput" placeholder="Cari berdasarkan nama, NIK, atau RT..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                        <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                            <thead class="bg-slate-50 text-slate-700 font-semibold">
+                                <tr>
+                                    <th class="px-6 py-3.5">NIK</th>
+                                    <th class="px-6 py-3.5">Nama Lengkap</th>
+                                    <th class="px-6 py-3.5">RT</th>
+                                    <th class="px-6 py-3.5">Status Pilih</th>
+                                    <th class="px-6 py-3.5 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="votersTableBody" class="divide-y divide-slate-100 bg-white text-slate-600">
+                                <!-- Dynamic voters -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Berita Acara Preview Modal -->
+    <div id="beritaAcaraModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-2 sm:p-6 overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col my-auto">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50 rounded-t-3xl">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-file-shield text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Preview Berita Acara Hasil Pemilihan</h3>
+                        <p class="text-xs text-slate-500">Dokumen Resmi Rekapitulasi Pemilihan Ketua RW 07 (Periode 2026-2030)</p>
+                    </div>
+                </div>
+                <button id="closeBeritaAcaraBtn" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Printable Paper Preview) -->
+            <div class="p-6 sm:p-10 overflow-y-auto flex-grow bg-slate-100/50">
+                <div id="printableBeritaAcara" class="bg-white p-8 sm:p-12 shadow-md border border-slate-200 rounded-2xl max-w-3xl mx-auto space-y-6 text-slate-800">
+                    
+                    <!-- Paper Header -->
+                    <div class="text-center border-b-2 border-slate-800 pb-6 space-y-1">
+                        <h4 class="text-xs font-bold tracking-widest uppercase text-slate-600">PANITIA PEMILIHAN KETUA RW 07</h4>
+                        <h2 class="text-xl font-bold uppercase tracking-tight text-slate-900">DESA KEPONGPONGAN, KECAMATAN TALUN</h2>
+                        <h3 class="text-sm font-semibold text-slate-700">KABUPATEN CIREBON</h3>
+                        <p class="text-[11px] text-slate-500 pt-1">Sekretariat: Balai Warga RW 07 Desa Kepongpongan 45171</p>
+                    </div>
+
+                    <!-- Title -->
+                    <div class="text-center space-y-1 py-2">
+                        <h3 class="font-bold text-base underline uppercase text-slate-900">BERITA ACARA REKAPITULASI HASIL PEMILIHAN</h3>
+                        <p class="text-xs text-slate-600 font-mono">Nomor: 07 /PAN-RW07/KP/III/2026</p>
+                    </div>
+
+                    <!-- Intro paragraph -->
+                    <p id="baIntroParagraph" class="text-xs sm:text-sm text-slate-700 leading-relaxed text-justify">
+                        Pada hari ini, ...................., tanggal ...................., bertempat di Wilayah RW 07 Desa Kepongpongan Kecamatan Talun Kabupaten Cirebon, Panitia Pemilihan telah menyelenggarakan pemungutan suara pemilihan Ketua RW 07 periode 2026 - 2030 secara transparan dan demokratis.
+                    </p>
+
+                    <!-- Summary statistics table -->
+                    <div class="space-y-2">
+                        <h5 class="text-xs font-bold uppercase text-slate-700">I. Rekapitulasi Pemilih</h5>
+                        <table class="w-full text-xs border border-slate-300">
+                            <tbody>
+                                <tr class="border-b border-slate-300">
+                                    <td class="p-2.5 bg-slate-50 font-medium w-3/5">Jumlah Pemilih Terdaftar (DPT)</td>
+                                    <td id="baTotalDpt" class="p-2.5 font-bold text-center w-2/5">0 Orang</td>
+                                </tr>
+                                <tr class="border-b border-slate-300">
+                                    <td class="p-2.5 bg-slate-50 font-medium">Jumlah Warga Menggunakan Hak Pilih (Suara Masuk)</td>
+                                    <td id="baTotalVoted" class="p-2.5 font-bold text-center">0 Orang</td>
+                                </tr>
+                                <tr class="border-b border-slate-300">
+                                    <td class="p-2.5 bg-slate-50 font-medium">Jumlah Suara Golput / Belum Memilih</td>
+                                    <td id="baTotalUnvoted" class="p-2.5 font-bold text-center">0 Orang</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2.5 bg-slate-50 font-medium">Tingkat Partisipasi Warga</td>
+                                    <td id="baTurnout" class="p-2.5 font-bold text-center">0%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Candidates Results Table -->
+                    <div class="space-y-2 pt-2">
+                        <h5 class="text-xs font-bold uppercase text-slate-700">II. Perolehan Suara Kandidat Calon Ketua RW 07</h5>
+                        <table class="w-full text-xs border border-slate-300">
+                            <thead>
+                                <tr class="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold">
+                                    <th class="p-2.5 text-center w-16">No. Urut</th>
+                                    <th class="p-2.5 text-left">Nama Kandidat</th>
+                                    <th class="p-2.5 text-left">Asal RT</th>
+                                    <th class="p-2.5 text-center w-24">Perolehan Suara</th>
+                                </tr>
+                            </thead>
+                            <tbody id="baCandidatesTableBody">
+                                <!-- Dynamic BA candidate rows -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Conclusion -->
+                    <div class="space-y-2 pt-2">
+                        <h5 class="text-xs font-bold uppercase text-slate-700">III. Penetapan Hasil</h5>
+                        <p id="baWinnerStatement" class="text-xs sm:text-sm text-slate-700 leading-relaxed bg-emerald-50 p-3.5 rounded-xl border border-emerald-200 font-medium">
+                            Menetapkan Calon Ketua RW 07 Terpilih...
+                        </p>
+                    </div>
+
+                    <!-- Signatures -->
+                    <div class="pt-8 grid grid-cols-2 gap-8 text-center text-xs">
+                        <div class="space-y-16">
+                            <p class="font-semibold">Mengetahui,<br>Kepala Desa Kepongpongan</p>
+                            <div class="pt-2">
+                                <span class="font-bold underline uppercase">( ........................................ )</span>
+                            </div>
+                        </div>
+                        <div class="space-y-16">
+                            <p class="font-semibold">Ketua Panitia Pemilihan<br>RW 07 Desa Kepongpongan</p>
+                            <div class="pt-2">
+                                <span class="font-bold underline uppercase">( Panitia Pelaksana )</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-slate-200 flex items-center justify-end space-x-3 bg-white rounded-b-3xl">
+                <button id="closeBeritaAcaraBottomBtn" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-sm transition">Tutup</button>
+                <button id="btnPrintPdf" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm transition flex items-center space-x-2 shadow-md">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Download / Cetak PDF</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voter Login Modal -->
+    <div id="voterLoginModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-900">Verifikasi NIK Pemilih</h3>
+                <button id="closeVoterLoginBtn" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Nomor Induk Kependudukan (NIK)</label>
+                <input type="text" id="loginNikInput" placeholder="Masukkan 16 digit NIK..." class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 text-sm">
+                <p class="text-xs text-slate-400 mt-1.5"><i class="fa-solid fa-circle-info mr-1"></i> Data dicocokkan dengan DPT Cloud RW 07.</p>
+            </div>
+            <div class="flex justify-end space-x-3 pt-2">
+                <button type="button" id="cancelVoterLoginBtn" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-sm">Batal</button>
+                <button id="submitVoterLoginBtn" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-md">Masuk Bilik Suara</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-900">Login Panitia / Admin</h3>
+                <button id="closeAdminLoginBtn" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">PIN Akses Panitia</label>
+                <input type="password" id="adminPinInput" placeholder="Masukkan PIN (Default: 0707)" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-800 outline-none text-slate-800 text-sm">
+            </div>
+            <div class="flex justify-end space-x-3 pt-2">
+                <button type="button" id="cancelAdminLoginBtn" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-sm">Batal</button>
+                <button id="submitAdminLoginBtn" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-medium rounded-xl text-sm shadow-md">Masuk Panel Admin</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Votes PIN Verification Modal -->
+    <div id="resetPinModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                <div class="flex items-center space-x-2 text-rose-600">
+                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                    <h3 class="text-lg font-bold text-slate-900">Konfirmasi Reset Suara Cloud</h3>
+                </div>
+                <button id="closeResetPinBtn" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+                Tindakan ini akan mereset status seluruh warga DPT kembali menjadi <b>Belum Memilih</b> di database online. Masukkan PIN Panitia:
+            </p>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-2">PIN Akses Panitia</label>
+                <input type="password" id="resetPinInput" placeholder="Masukkan PIN (Default: 0707)" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 outline-none text-slate-800 text-sm">
+            </div>
+            <div class="flex justify-end space-x-3 pt-2">
+                <button type="button" id="cancelResetPinBtn" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-sm">Batal</button>
+                <button id="submitResetPinBtn" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-xl text-sm shadow-md">Reset Sekarang</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Candidate Modal -->
+    <div id="candidateModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                <h3 id="candidateModalTitle" class="text-lg font-bold text-slate-900">Tambah Kandidat Calon RW</h3>
+                <button id="closeCandidateModalBtn" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="candidateForm" class="space-y-4">
+                <input type="hidden" id="editCandidateId">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nomor Urut</label>
+                    <input type="number" id="candNumber" required min="1" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Lengkap Kandidat</label>
+                    <input type="text" id="candName" required placeholder="Contoh: Bpk. H. Ahmad Sutisna" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Asal RT (Wilayah)</label>
+                    <input type="text" id="candRt" required placeholder="Contoh: RT 03 / RW 07" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">URL Foto Profil</label>
+                    <input type="url" id="candPhoto" placeholder="https://images.unsplash.com/..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Visi & Misi Singkat</label>
+                    <textarea id="candVision" rows="3" required placeholder="Tuliskan visi misi singkat..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3 pt-3">
+                    <button type="button" id="cancelCandidateModalBtn" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-sm">Batal</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-md">Simpan Kandidat</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Voter Modal -->
+    <div id="voterModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                <h3 id="voterModalTitle" class="text-lg font-bold text-slate-900">Tambah Warga DPT</h3>
+                <button id="closeVoterModalBtn" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="voterForm" class="space-y-4">
+                <input type="hidden" id="editVoterOriginalNik">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">NIK (Nomor Induk Kependudukan)</label>
+                    <input type="text" id="voterNik" required placeholder="16 digit NIK" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Lengkap Warga</label>
+                    <input type="text" id="voterName" required placeholder="Nama sesuai KTP" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">RT (Rukun Tetangga)</label>
+                    <select id="voterRt" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
+                        <option value="RT 01">RT 01</option>
+                        <option value="RT 02">RT 02</option>
+                        <option value="RT 03">RT 03</option>
+                        <option value="RT 04">RT 04</option>
+                        <option value="RT 05">RT 05</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3 pt-3">
+                    <button type="button" id="cancelVoterModalBtn" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-sm">Batal</button>
+                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-md">Simpan Warga</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 space-y-1">
+        <p>© 2026 Panitia Pemilihan Ketua RW 07 Desa Kepongpongan. All rights reserved.</p>
+        <p class="text-slate-400">Demokrasi Warga Terhubung Cloud (Periode 2026-2030).</p>
+        <p class="font-bold text-emerald-800 pt-1">Dibuat oleh: Ruang Server | Asep WG</p>
+    </footer>
+
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase variables
+        let db, auth;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'rw07-kepongpongan-default';
+
+        const DEFAULT_CANDIDATES = [
+            {
+                id: "cand_1",
+                number: 1,
+                name: "H. Suhendra, S.Pd.",
+                rt: "RT 01 / RW 07",
+                photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
+                vision: "Mewujudkan kerukunan warga RW 07 yang transparan, religius, dan tanggap darurat sosial."
+            },
+            {
+                id: "cand_2",
+                number: 2,
+                name: "Drs. H. Maman Surahman",
+                rt: "RT 02 / RW 07",
+                photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400",
+                vision: "Peningkatan infrastruktur lingkungan bersih serta penguatan keamanan ronda malam terpadu."
+            },
+            {
+                id: "cand_3",
+                number: 3,
+                name: "Yudi Hartanto, S.E.",
+                rt: "RT 04 / RW 07",
+                photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400",
+                vision: "Digitalisasi administrasi warga RW 07 dan pemberdayaan UMKM pemuda karang taruna."
+            }
+        ];
+
+        const DEFAULT_VOTERS = [
+            { nik: "3209123456780001", name: "Siti Aminah", rt: "RT 01", hasVoted: true, votedCandidateId: "cand_1" },
+            { nik: "3209123456780002", name: "Budi Santoso", rt: "RT 01", hasVoted: false, votedCandidateId: null },
+            { nik: "3209123456780003", name: "Dewi Lestari", rt: "RT 02", hasVoted: true, votedCandidateId: "cand_3" },
+            { nik: "3209123456780004", name: "Rian Hidayat", rt: "RT 02", hasVoted: false, votedCandidateId: null },
+            { nik: "3209123456780005", name: "Asep Saepudin", rt: "RT 03", hasVoted: true, votedCandidateId: "cand_2" },
+            { nik: "3209123456780006", name: "Sri Wahyuni", rt: "RT 03", hasVoted: false, votedCandidateId: null },
+            { nik: "3209123456780007", name: "Joko Widodo", rt: "RT 04", hasVoted: true, votedCandidateId: "cand_3" },
+            { nik: "3209123456780008", name: "Nurul Hidayah", rt: "RT 04", hasVoted: false, votedCandidateId: null },
+            { nik: "3209123456780009", name: "Eko Prasetyo", rt: "RT 05", hasVoted: false, votedCandidateId: null },
+            { nik: "3209123456780010", name: "Rina Marlina", rt: "RT 05", hasVoted: false, votedCandidateId: null }
+        ];
+
+        // Application State Arrays (Synced with Firestore)
+        let candidates = [];
+        let voters = [];
+        let currentUser = JSON.parse(localStorage.getItem('rw07_current_user')) || null;
+        let selectedCandidateId = null;
+        let modalCallback = null;
+
+        // Custom Modal UI helper
+        window.showModal = function(title, message, iconType = 'check', showCancel = false, callback = null) {
+            const overlay = document.getElementById('modalOverlay');
+            const container = document.getElementById('modalContainer');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = message;
+            
+            const iconBg = document.getElementById('modalIconBg');
+            const icon = document.getElementById('modalIcon');
+            if (iconType === 'check') {
+                iconBg.className = "w-10 h-10 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600";
+                icon.className = "fa-solid fa-check text-lg";
+            } else if (iconType === 'warning') {
+                iconBg.className = "w-10 h-10 rounded-full flex items-center justify-center bg-amber-100 text-amber-600";
+                icon.className = "fa-solid fa-triangle-exclamation text-lg";
+            } else {
+                iconBg.className = "w-10 h-10 rounded-full flex items-center justify-center bg-rose-100 text-rose-600";
+                icon.className = "fa-solid fa-xmark text-lg";
+            }
+
+            const cancelBtn = document.getElementById('modalCancelBtn');
+            if (showCancel) {
+                cancelBtn.classList.remove('hidden');
+            } else {
+                cancelBtn.classList.add('hidden');
+            }
+
+            modalCallback = callback;
+            overlay.classList.remove('hidden');
+            setTimeout(() => {
+                container.classList.remove('scale-95', 'opacity-0');
+                container.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        };
+
+        function closeModal(isConfirmed) {
+            const overlay = document.getElementById('modalOverlay');
+            const container = document.getElementById('modalContainer');
+            container.classList.remove('scale-100', 'opacity-100');
+            container.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                if (isConfirmed && modalCallback) {
+                    modalCallback();
+                }
+                modalCallback = null;
+            }, 150);
+        }
+
+        // --- FIREBASE INITIALIZATION & REAL-TIME SYNC ---
+        async function initFirebase() {
+            try {
+                if (typeof __firebase_config !== 'undefined') {
+                    const firebaseConfig = JSON.parse(__firebase_config);
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    document.getElementById('connectionStatus').classList.remove('hidden');
+                    document.getElementById('connectionStatus').classList.add('flex');
+
+                    // Start Listeners
+                    setupFirestoreListeners();
+                } else {
+                    // Fallback to LocalStorage if Firebase config is absent
+                    console.warn("Firebase config not found. Running with local memory.");
+                    candidates = JSON.parse(localStorage.getItem('rw07_candidates')) || DEFAULT_CANDIDATES;
+                    voters = JSON.parse(localStorage.getItem('rw07_voters')) || DEFAULT_VOTERS;
+                    checkSession();
+                }
+            } catch (err) {
+                console.error("Firebase init error:", err);
+                candidates = DEFAULT_CANDIDATES;
+                voters = DEFAULT_VOTERS;
+                checkSession();
+            }
+        }
+
+        function setupFirestoreListeners() {
+            if (!db) return;
+
+            // 1. Listen Candidates Collection
+            const candidatesRef = collection(db, 'artifacts', appId, 'public', 'data', 'candidates');
+            onSnapshot(candidatesRef, (snapshot) => {
+                if (snapshot.empty) {
+                    // Seed initial candidates if empty
+                    DEFAULT_CANDIDATES.forEach(c => {
+                        setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'candidates', c.id), c);
+                    });
+                } else {
+                    candidates = [];
+                    snapshot.forEach(docSnap => {
+                        candidates.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+                }
+                refreshCurrentView();
+            }, (error) => {
+                console.error("Error reading candidates:", error);
+            });
+
+            // 2. Listen Voters Collection
+            const votersRef = collection(db, 'artifacts', appId, 'public', 'data', 'voters');
+            onSnapshot(votersRef, (snapshot) => {
+                if (snapshot.empty) {
+                    // Seed initial voters if empty
+                    DEFAULT_VOTERS.forEach(v => {
+                        setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'voters', v.nik), v);
+                    });
+                } else {
+                    voters = [];
+                    snapshot.forEach(docSnap => {
+                        voters.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+                }
+                refreshCurrentView();
+            }, (error) => {
+                console.error("Error reading voters:", error);
+            });
+        }
+
+        function refreshCurrentView() {
+            checkSession();
+        }
+
+        // --- AUTH & NAVIGATION ROUTING ---
+        function checkSession() {
+            const viewAuth = document.getElementById('view-auth');
+            const viewVoter = document.getElementById('view-voter-portal');
+            const viewAdmin = document.getElementById('view-admin-portal');
+            const userRoleBadge = document.getElementById('userRoleBadge');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const roleBadgeText = document.getElementById('roleBadgeText');
+            const roleBadgeIcon = document.getElementById('roleBadgeIcon');
+
+            if (!currentUser) {
+                viewAuth.classList.remove('hidden');
+                viewVoter.classList.add('hidden');
+                viewAdmin.classList.add('hidden');
+                userRoleBadge.classList.add('hidden');
+                logoutBtn.classList.add('hidden');
+            } else if (currentUser.role === 'voter') {
+                viewAuth.classList.add('hidden');
+                viewVoter.classList.remove('hidden');
+                viewAdmin.classList.add('hidden');
+                userRoleBadge.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
+                roleBadgeText.innerText = `Warga: ${currentUser.data.name}`;
+                roleBadgeIcon.className = "fa-solid fa-person-booth text-amber-300";
+
+                initVoterPortal();
+            } else if (currentUser.role === 'admin') {
+                viewAuth.classList.add('hidden');
+                viewVoter.classList.add('hidden');
+                viewAdmin.classList.remove('hidden');
+                userRoleBadge.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
+                roleBadgeText.innerText = "Panitia / Admin RW 07";
+                roleBadgeIcon.className = "fa-solid fa-user-gear text-amber-300";
+
+                const activeTab = document.getElementById('admin-tab-candidates').classList.contains('hidden') &&
+                                  !document.getElementById('admin-tab-results').classList.contains('hidden') ? 'results' :
+                                  !document.getElementById('admin-tab-voters').classList.contains('hidden') ? 'voters' : 'candidates';
+                switchAdminTab(activeTab);
+            }
+        }
+
+        function logoutSession() {
+            currentUser = null;
+            selectedCandidateId = null;
+            localStorage.removeItem('rw07_current_user');
+            checkSession();
+        }
+
+        // Helper to calculate candidate votes directly from DPT records
+        function getCandidateVotes(candidateId) {
+            return voters.filter(v => v.hasVoted && v.votedCandidateId === candidateId).length;
+        }
+
+        // --- VOTER LOGIN & PORTAL ---
+        function openVoterLogin() {
+            document.getElementById('loginNikInput').value = '';
+            document.getElementById('voterLoginModal').classList.remove('hidden');
+        }
+
+        function closeVoterLoginModal() {
+            document.getElementById('voterLoginModal').classList.add('hidden');
+        }
+
+        function verifyAndLoginVoter() {
+            const nik = document.getElementById('loginNikInput').value.trim();
+            if (!nik) {
+                showModal("Peringatan", "Mohon masukkan NIK Anda terlebih dahulu.", "warning");
+                return;
+            }
+
+            const voter = voters.find(v => v.nik === nik);
+            if (!voter) {
+                showModal("NIK Tidak Ditemukan", "NIK tersebut tidak terdaftar di dalam Daftar Pemilih Tetap (DPT) RW 07 Desa Kepongpongan.", "error");
+                return;
+            }
+
+            closeVoterLoginModal();
+            currentUser = { role: 'voter', data: voter };
+            localStorage.setItem('rw07_current_user', JSON.stringify(currentUser));
+            checkSession();
+        }
+
+        function initVoterPortal() {
+            const voter = currentUser.data;
+            const freshVoter = voters.find(v => v.nik === voter.nik) || voter;
+            currentUser.data = freshVoter;
+            
+            document.getElementById('voterPortalGreeting').innerText = `Selamat Datang, ${freshVoter.name}`;
+            document.getElementById('loggedInVoterName').innerText = freshVoter.name;
+            document.getElementById('loggedInVoterInfo').innerText = `NIK: ${freshVoter.nik} • Asal ${freshVoter.rt}`;
+
+            const ballotStep = document.getElementById('voteStepBallot');
+            const successStep = document.getElementById('voteStepSuccess');
+
+            if (freshVoter.hasVoted) {
+                ballotStep.classList.add('hidden');
+                successStep.classList.remove('hidden');
+            } else {
+                ballotStep.classList.remove('hidden');
+                successStep.classList.add('hidden');
+                renderBallotCandidates();
+            }
+        }
+
+        function renderBallotCandidates() {
+            const grid = document.getElementById('ballotCandidatesGrid');
+            grid.innerHTML = '';
+
+            candidates.sort((a, b) => a.number - b.number).forEach(cand => {
+                const photoUrl = cand.photo && cand.photo.trim() !== '' ? cand.photo : 'https://placehold.co/400x400/e2e8f0/64748b?text=Foto+Calon';
+                const card = document.createElement('div');
+                card.id = `ballot-card-${cand.id}`;
+                card.className = "cursor-pointer bg-white border-2 border-slate-200 rounded-3xl p-4 flex items-center space-x-4 hover:border-emerald-500 transition shadow-sm";
+                card.onclick = () => selectBallotCandidate(cand.id);
+                card.innerHTML = `
+                    <div class="w-16 h-16 rounded-2xl overflow-hidden bg-slate-100 flex-shrink-0">
+                        <img src="${photoUrl}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x400/e2e8f0/64748b?text=Foto+Calon'">
+                    </div>
+                    <div class="flex-grow">
+                        <span class="inline-block px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[11px] mb-1">No. ${cand.number}</span>
+                        <h4 class="font-bold text-slate-900 text-sm">${cand.name}</h4>
+                        <p class="text-xs text-slate-500">${cand.rt}</p>
+                    </div>
+                    <div class="w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center ballot-radio">
+                        <div class="w-3 h-3 rounded-full bg-emerald-600 hidden" id="inner-radio-${cand.id}"></div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function selectBallotCandidate(id) {
+            selectedCandidateId = id;
+            candidates.forEach(c => {
+                const card = document.getElementById(`ballot-card-${c.id}`);
+                const inner = document.getElementById(`inner-radio-${c.id}`);
+                if (c.id === id) {
+                    if (card) card.className = "cursor-pointer bg-emerald-50/50 border-2 border-emerald-600 rounded-3xl p-4 flex items-center space-x-4 transition shadow-sm";
+                    if (inner) inner.classList.remove('hidden');
+                } else {
+                    if (card) card.className = "cursor-pointer bg-white border-2 border-slate-200 rounded-3xl p-4 flex items-center space-x-4 hover:border-emerald-500 transition shadow-sm";
+                    if (inner) inner.classList.add('hidden');
+                }
+            });
+
+            const submitBtn = document.getElementById('submitVoteBtn');
+            submitBtn.disabled = false;
+            submitBtn.className = "px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl transition shadow-lg shadow-emerald-600/20 w-full sm:w-auto cursor-pointer";
+        }
+
+        async function submitVote() {
+            if (!currentUser || !selectedCandidateId) return;
+
+            showModal("Konfirmasi Suara", "Apakah Anda yakin dengan pilihan calon Ketua RW ini? Pilihan tidak dapat diubah setelah dikirim.", "warning", true, async () => {
+                try {
+                    if (db) {
+                        const voterRef = doc(db, 'artifacts', appId, 'public', 'data', 'voters', currentUser.data.nik);
+                        await updateDoc(voterRef, {
+                            hasVoted: true,
+                            votedCandidateId: selectedCandidateId
+                        });
+                    } else {
+                        const v = voters.find(x => x.nik === currentUser.data.nik);
+                        if (v) {
+                            v.hasVoted = true;
+                            v.votedCandidateId = selectedCandidateId;
+                            localStorage.setItem('rw07_voters', JSON.stringify(voters));
+                        }
+                    }
+
+                    currentUser.data.hasVoted = true;
+                    currentUser.data.votedCandidateId = selectedCandidateId;
+                    localStorage.setItem('rw07_current_user', JSON.stringify(currentUser));
+
+                    document.getElementById('voteStepBallot').classList.add('hidden');
+                    document.getElementById('voteStepSuccess').classList.remove('hidden');
+                } catch (e) {
+                    console.error("Error submitting vote:", e);
+                    showModal("Gagal", "Terjadi kesalahan saat mengirim suara ke database online.", "error");
+                }
+            });
+        }
+
+        // --- ADMIN LOGIN & PORTAL ---
+        function openAdminLoginModal() {
+            document.getElementById('adminPinInput').value = '';
+            document.getElementById('adminLoginModal').classList.remove('hidden');
+        }
+
+        function closeAdminLoginModal() {
+            document.getElementById('adminLoginModal').classList.add('hidden');
+        }
+
+        function verifyAndLoginAdmin() {
+            const pin = document.getElementById('adminPinInput').value.trim();
+            if (pin !== "0707") {
+                showModal("PIN Salah", "PIN Panitia yang Anda masukkan salah. (Default PIN: 0707)", "error");
+                return;
+            }
+
+            closeAdminLoginModal();
+            currentUser = { role: 'admin', data: { name: 'Panitia Utama RW 07' } };
+            localStorage.setItem('rw07_current_user', JSON.stringify(currentUser));
+            checkSession();
+        }
+
+        function switchAdminTab(tabName) {
+            const tabs = ['candidates', 'results', 'voters'];
+            tabs.forEach(t => {
+                const section = document.getElementById(`admin-tab-${t}`);
+                const navBtn = document.getElementById(`admin-nav-${t}`);
+                if (t === tabName) {
+                    section.classList.remove('hidden');
+                    navBtn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition bg-white text-emerald-900 shadow-sm flex items-center space-x-2";
+                } else {
+                    section.classList.add('hidden');
+                    navBtn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition text-slate-600 hover:text-slate-900 flex items-center space-x-2";
+                }
+            });
+
+            if (tabName === 'candidates') renderAdminCandidates();
+            if (tabName === 'results') renderAdminResults();
+            if (tabName === 'voters') renderVotersTable();
+        }
+
+        // --- ADMIN CANDIDATES MANAGEMENT ---
+        function renderAdminCandidates() {
+            const grid = document.getElementById('adminCandidatesGrid');
+            grid.innerHTML = '';
+            
+            const totalVotes = voters.filter(v => v.hasVoted).length;
+
+            candidates.sort((a, b) => a.number - b.number).forEach(cand => {
+                const candVotes = getCandidateVotes(cand.id);
+                const percentage = totalVotes > 0 ? ((candVotes / totalVotes) * 100).toFixed(1) : 0;
+                const photoUrl = cand.photo && cand.photo.trim() !== '' ? cand.photo : 'https://placehold.co/400x400/e2e8f0/64748b?text=Foto+Calon';
+
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition";
+                card.innerHTML = `
+                    <div>
+                        <div class="relative h-56 bg-slate-100">
+                            <img src="${photoUrl}" alt="${cand.name}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x400/e2e8f0/64748b?text=Foto+Calon'">
+                            <div class="absolute top-4 left-4 bg-emerald-600 text-white font-bold px-3.5 py-1.5 rounded-full text-sm shadow-md">
+                                No. Urut ${cand.number}
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <div>
+                                <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wide">${cand.rt}</span>
+                                <h3 class="text-xl font-bold text-slate-900 mt-0.5">${cand.name}</h3>
+                            </div>
+                            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                                <span class="text-[11px] font-bold text-slate-400 uppercase block mb-1">Visi & Misi</span>
+                                <p class="text-xs text-slate-600 italic leading-relaxed">"${cand.vision}"</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-6 pb-6 pt-2 flex items-center justify-between border-t border-slate-100 mt-2">
+                        <div>
+                            <span class="text-xs text-slate-400 block">Perolehan Suara</span>
+                            <span class="text-lg font-bold text-emerald-700">${candVotes} Suara <span class="text-xs font-normal text-slate-500">(${percentage}%)</span></span>
+                        </div>
+                        <div class="flex space-x-1">
+                            <button onclick="openEditCandidateModal('${cand.id}')" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition" title="Edit Kandidat">
+                                <i class="fa-solid fa-pen text-xs"></i>
+                            </button>
+                            <button onclick="confirmDeleteCandidate('${cand.id}')" class="w-9 h-9 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition" title="Hapus Kandidat">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- ADMIN RESULTS ---
+        function renderAdminResults() {
+            const totalDpt = voters.length;
+            const totalVoted = voters.filter(v => v.hasVoted).length;
+            const turnout = totalDpt > 0 ? ((totalVoted / totalDpt) * 100).toFixed(1) : 0;
+
+            document.getElementById('statTotalDpt').innerText = totalDpt;
+            document.getElementById('statTotalVoted').innerText = totalVoted;
+            document.getElementById('statTurnout').innerText = `${turnout}%`;
+
+            const container = document.getElementById('resultsBarsContainer');
+            container.innerHTML = '';
+
+            const resultsWithVotes = candidates.map(cand => ({
+                ...cand,
+                votes: getCandidateVotes(cand.id)
+            }));
+
+            resultsWithVotes.sort((a, b) => b.votes - a.votes).forEach((cand, index) => {
+                const percentage = totalVoted > 0 ? ((cand.votes / totalVoted) * 100).toFixed(1) : 0;
+                const photoUrl = cand.photo && cand.photo.trim() !== '' ? cand.photo : 'https://placehold.co/400x400/e2e8f0/64748b?text=Calon';
+
+                const item = document.createElement('div');
+                item.className = "bg-slate-50 border border-slate-200/80 p-5 rounded-2xl space-y-3";
+                item.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0">#${index + 1}</span>
+                            <div class="w-10 h-10 rounded-xl overflow-hidden bg-slate-200 flex-shrink-0">
+                                <img src="${photoUrl}" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-base">${cand.name} <span class="text-xs font-normal text-slate-500">(No. ${cand.number})</span></h4>
+                                <span class="text-xs text-slate-500">${cand.rt}</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xl font-bold text-emerald-700">${cand.votes} <span class="text-xs font-medium text-slate-500">Suara</span></span>
+                            <span class="text-xs text-slate-400 block">(${percentage}%)</span>
+                        </div>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-3.5 overflow-hidden">
+                        <div class="bg-emerald-600 h-3.5 rounded-full transition-all duration-1000" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // --- RESET VOTES WITH PIN VERIFICATION ---
+        function openResetPinModal() {
+            document.getElementById('resetPinInput').value = '';
+            document.getElementById('resetPinModal').classList.remove('hidden');
+        }
+
+        function closeResetPinModal() {
+            document.getElementById('resetPinModal').classList.add('hidden');
+        }
+
+        async function verifyAndExecuteReset() {
+            const pin = document.getElementById('resetPinInput').value.trim();
+            if (pin !== "0707") {
+                showModal("PIN Salah", "PIN Panitia yang Anda masukkan salah untuk verifikasi reset. (Default PIN: 0707)", "error");
+                return;
+            }
+
+            try {
+                if (db) {
+                    for (const v of voters) {
+                        const voterRef = doc(db, 'artifacts', appId, 'public', 'data', 'voters', v.nik);
+                        await updateDoc(voterRef, {
+                            hasVoted: false,
+                            votedCandidateId: null
+                        });
+                    }
+                } else {
+                    voters.forEach(v => {
+                        v.hasVoted = false;
+                        v.votedCandidateId = null;
+                    });
+                    localStorage.setItem('rw07_voters', JSON.stringify(voters));
+                }
+
+                closeResetPinModal();
+                renderAdminResults();
+                showModal("Reset Berhasil", "Semua perolehan suara telah direset dan status pemilih DPT dikembalikan menjadi belum memilih.", "check");
+            } catch (e) {
+                console.error("Error resetting votes:", e);
+                showModal("Gagal", "Terjadi kesalahan saat mereset suara di database online.", "error");
+            }
+        }
+
+        // --- BERITA ACARA PREVIEW & PDF ---
+        function openBeritaAcaraModal() {
+            const totalDpt = voters.length;
+            const totalVoted = voters.filter(v => v.hasVoted).length;
+            const totalUnvoted = totalDpt - totalVoted;
+            const turnout = totalDpt > 0 ? ((totalVoted / totalDpt) * 100).toFixed(1) : 0;
+
+            document.getElementById('baTotalDpt').innerText = `${totalDpt} Orang`;
+            document.getElementById('baTotalVoted').innerText = `${totalVoted} Orang`;
+            document.getElementById('baTotalUnvoted').innerText = `${totalUnvoted} Orang`;
+            document.getElementById('baTurnout').innerText = `${turnout}%`;
+
+            // Format dynamic current date in Indonesian
+            const now = new Date();
+            const optionsDay = { weekday: 'long' };
+            const optionsDate = { day: 'numeric', month: 'long', year: 'numeric' };
+            const dayName = now.toLocaleDateString('id-ID', optionsDay);
+            const dateStr = now.toLocaleDateString('id-ID', optionsDate);
+
+            const introParagraph = document.getElementById('baIntroParagraph');
+            introParagraph.innerHTML = `Pada hari ini <b>${dayName}</b> tanggal <b>${dateStr}</b>, bertempat di Wilayah RW 07 Desa Kepongpongan Kecamatan Talun Kabupaten Cirebon, Panitia Pemilihan telah menyelenggarakan pemungutan suara pemilihan Ketua RW 07 periode 2026 - 2030 secara transparan dan demokratis.`;
+
+            // Candidates list sorted by votes
+            const resultsWithVotes = candidates.map(cand => ({
+                ...cand,
+                votes: getCandidateVotes(cand.id)
+            })).sort((a, b) => b.votes - a.votes);
+
+            const tbody = document.getElementById('baCandidatesTableBody');
+            tbody.innerHTML = '';
+
+            resultsWithVotes.forEach((cand, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-200";
+                tr.innerHTML = `
+                    <td class="p-2.5 text-center font-bold">0${cand.number}</td>
+                    <td class="p-2.5 font-bold text-slate-900">${cand.name} ${idx === 0 && cand.votes > 0 ? '<span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full ml-1 font-semibold">Terpilih</span>' : ''}</td>
+                    <td class="p-2.5 text-slate-600">${cand.rt}</td>
+                    <td class="p-2.5 text-center font-bold text-emerald-700">${cand.votes} Suara</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Winner statement
+            const statement = document.getElementById('baWinnerStatement');
+            if (totalVoted === 0) {
+                statement.innerText = "Belum ada suara yang masuk dalam bilik pemilihan RW 07.";
+            } else {
+                const winner = resultsWithVotes[0];
+                statement.innerHTML = `Berdasarkan hasil rekapitulasi suara di atas, dengan perolehan sebanyak <b>${winner.votes} suara</b>, maka Saudara <b>${winner.name}</b> secara resmi ditetapkan sebagai Ketua RW 07 Desa Kepongpongan Terpilih Periode 2026 - 2030.`;
+            }
+
+            document.getElementById('beritaAcaraModal').classList.remove('hidden');
+        }
+
+        function closeBeritaAcaraModal() {
+            document.getElementById('beritaAcaraModal').classList.add('hidden');
+        }
+
+        function printBeritaAcaraPdf() {
+            window.print();
+        }
+
+        // --- ADMIN DPT TABLE ---
+        function renderVotersTable() {
+            const tbody = document.getElementById('votersTableBody');
+            tbody.innerHTML = '';
+
+            const keyword = document.getElementById('voterSearchInput').value.toLowerCase();
+            const filtered = voters.filter(v => v.name.toLowerCase().includes(keyword) || v.nik.includes(keyword) || v.rt.toLowerCase().includes(keyword));
+
+            filtered.forEach(v => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-mono text-xs font-semibold text-slate-700">${v.nik}</td>
+                    <td class="px-6 py-4 font-bold text-slate-900">${v.name}</td>
+                    <td class="px-6 py-4">${v.rt}</td>
+                    <td class="px-6 py-4">
+                        ${v.hasVoted 
+                            ? '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700"><i class="fa-solid fa-check mr-1 text-[10px]"></i> Sudah Memilih</span>' 
+                            : '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700"><i class="fa-solid fa-clock mr-1 text-[10px]"></i> Belum Memilih</span>'}
+                    </td>
+                    <td class="px-6 py-4 text-right space-x-2">
+                        <button onclick="openEditVoterModal('${v.nik}')" class="text-slate-400 hover:text-emerald-600 transition" title="Edit Warga">
+                            <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
+                        <button onclick="confirmDeleteVoter('${v.nik}')" class="text-slate-400 hover:text-rose-600 transition" title="Hapus Warga">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- CANDIDATE MODAL ACTIONS ---
+        function openAddCandidateModal() {
+            document.getElementById('candidateModalTitle').innerText = "Tambah Kandidat Calon RW";
+            document.getElementById('editCandidateId').value = '';
+            document.getElementById('candNumber').value = candidates.length + 1;
+            document.getElementById('candName').value = '';
+            document.getElementById('candRt').value = 'RT ';
+            document.getElementById('candPhoto').value = '';
+            document.getElementById('candVision').value = '';
+            document.getElementById('candidateModal').classList.remove('hidden');
+        }
+
+        window.openEditCandidateModal = function(id) {
+            const cand = candidates.find(c => c.id === id);
+            if (!cand) return;
+            document.getElementById('candidateModalTitle').innerText = "Edit Kandidat Calon RW";
+            document.getElementById('editCandidateId').value = cand.id;
+            document.getElementById('candNumber').value = cand.number;
+            document.getElementById('candName').value = cand.name;
+            document.getElementById('candRt').value = cand.rt;
+            document.getElementById('candPhoto').value = cand.photo;
+            document.getElementById('candVision').value = cand.vision;
+            document.getElementById('candidateModal').classList.remove('hidden');
+        };
+
+        function closeCandidateModal() {
+            document.getElementById('candidateModal').classList.add('hidden');
+        }
+
+        window.confirmDeleteCandidate = function(id) {
+            showModal("Hapus Kandidat", "Apakah Anda yakin ingin menghapus kandidat ini?", "warning", true, async () => {
+                try {
+                    if (db) {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'candidates', id));
+                    } else {
+                        candidates = candidates.filter(c => c.id !== id);
+                        localStorage.setItem('rw07_candidates', JSON.stringify(candidates));
+                    }
+                    renderAdminCandidates();
+                    showModal("Berhasil", "Kandidat telah dihapus dari database.", "check");
+                } catch (e) {
+                    console.error("Error deleting candidate:", e);
+                }
+            });
+        };
+
+        // --- VOTER MODAL ACTIONS ---
+        function openAddVoterModal() {
+            document.getElementById('voterModalTitle').innerText = "Tambah Warga DPT";
+            document.getElementById('editVoterOriginalNik').value = '';
+            document.getElementById('voterNik').value = '3209' + Math.floor(100000000000 + Math.random() * 900000000000);
+            document.getElementById('voterName').value = '';
+            document.getElementById('voterRt').value = 'RT 01';
+            document.getElementById('voterModal').classList.remove('hidden');
+        }
+
+        window.openEditVoterModal = function(nik) {
+            const voter = voters.find(v => v.nik === nik);
+            if (!voter) return;
+            document.getElementById('voterModalTitle').innerText = "Edit Data Warga DPT";
+            document.getElementById('editVoterOriginalNik').value = voter.nik;
+            document.getElementById('voterNik').value = voter.nik;
+            document.getElementById('voterName').value = voter.name;
+            document.getElementById('voterRt').value = voter.rt;
+            document.getElementById('voterModal').classList.remove('hidden');
+        };
+
+        function closeVoterModal() {
+            document.getElementById('voterModal').classList.add('hidden');
+        }
+
+        window.confirmDeleteVoter = function(nik) {
+            showModal("Hapus Pemilih", "Apakah Anda yakin ingin menghapus warga ini dari DPT?", "warning", true, async () => {
+                try {
+                    if (db) {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'voters', nik));
+                    } else {
+                        voters = voters.filter(v => v.nik !== nik);
+                        localStorage.setItem('rw07_voters', JSON.stringify(voters));
+                    }
+                    renderVotersTable();
+                    showModal("Berhasil", "Warga telah dihapus dari DPT.", "check");
+                } catch (e) {
+                    console.error("Error deleting voter:", e);
+                }
+            });
+        };
+
+        // DOM Event Listeners Setup
+        document.addEventListener('DOMContentLoaded', () => {
+            // Modal main confirm button
+            document.getElementById('modalConfirmBtn').addEventListener('click', () => closeModal(true));
+            document.getElementById('modalCancelBtn').addEventListener('click', () => closeModal(false));
+
+            // Auth Login Triggers
+            document.getElementById('btnOpenVoterLogin').addEventListener('click', openVoterLogin);
+            document.getElementById('closeVoterLoginBtn').addEventListener('click', closeVoterLoginModal);
+            document.getElementById('cancelVoterLoginBtn').addEventListener('click', closeVoterLoginModal);
+            document.getElementById('submitVoterLoginBtn').addEventListener('click', verifyAndLoginVoter);
+
+            document.getElementById('btnOpenAdminLogin').addEventListener('click', openAdminLoginModal);
+            document.getElementById('closeAdminLoginBtn').addEventListener('click', closeAdminLoginModal);
+            document.getElementById('cancelAdminLoginBtn').addEventListener('click', closeAdminLoginModal);
+            document.getElementById('submitAdminLoginBtn').addEventListener('click', verifyAndLoginAdmin);
+
+            // General Session Logout
+            document.getElementById('logoutBtn').addEventListener('click', logoutSession);
+            document.getElementById('successLogoutBtn').addEventListener('click', logoutSession);
+
+            // Voter Submit Vote Button
+            document.getElementById('submitVoteBtn').addEventListener('click', submitVote);
+
+            // Admin Navigation Tabs
+            document.getElementById('admin-nav-candidates').addEventListener('click', () => switchAdminTab('candidates'));
+            document.getElementById('admin-nav-results').addEventListener('click', () => switchAdminTab('results'));
+            document.getElementById('admin-nav-voters').addEventListener('click', () => switchAdminTab('voters'));
+
+            // Reset Votes triggers
+            document.getElementById('btnResetVotes').addEventListener('click', openResetPinModal);
+            document.getElementById('closeResetPinBtn').addEventListener('click', closeResetPinModal);
+            document.getElementById('cancelResetPinBtn').addEventListener('click', closeResetPinModal);
+            document.getElementById('submitResetPinBtn').addEventListener('click', verifyAndExecuteReset);
+
+            // Berita Acara Modals & Print
+            document.getElementById('btnOpenBeritaAcara').addEventListener('click', openBeritaAcaraModal);
+            document.getElementById('closeBeritaAcaraBtn').addEventListener('click', closeBeritaAcaraModal);
+            document.getElementById('closeBeritaAcaraBottomBtn').addEventListener('click', closeBeritaAcaraModal);
+            document.getElementById('btnPrintPdf').addEventListener('click', printBeritaAcaraPdf);
+
+            // Admin Actions
+            document.getElementById('btnAddCandidate').addEventListener('click', openAddCandidateModal);
+            document.getElementById('closeCandidateModalBtn').addEventListener('click', closeCandidateModal);
+            document.getElementById('cancelCandidateModalBtn').addEventListener('click', closeCandidateModal);
+            
+            document.getElementById('candidateForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('editCandidateId').value;
+                const number = parseInt(document.getElementById('candNumber').value);
+                const name = document.getElementById('candName').value.trim();
+                const rt = document.getElementById('candRt').value.trim();
+                const photo = document.getElementById('candPhoto').value.trim();
+                const vision = document.getElementById('candVision').value.trim();
+
+                const candId = id ? id : 'cand_' + Date.now();
+                const candData = { id: candId, number, name, rt, photo, vision };
+
+                try {
+                    if (db) {
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'candidates', candId), candData);
+                    } else {
+                        if (id) {
+                            const idx = candidates.findIndex(c => c.id === id);
+                            if (idx !== -1) candidates[idx] = candData;
+                        } else {
+                            candidates.push(candData);
+                        }
+                        localStorage.setItem('rw07_candidates', JSON.stringify(candidates));
+                    }
+
+                    closeCandidateModal();
+                    renderAdminCandidates();
+                    showModal("Berhasil", "Data kandidat berhasil disimpan ke cloud database.", "check");
+                } catch (err) {
+                    console.error("Error saving candidate:", err);
+                }
+            });
+
+            document.getElementById('btnAddVoter').addEventListener('click', openAddVoterModal);
+            document.getElementById('closeVoterModalBtn').addEventListener('click', closeVoterModal);
+            document.getElementById('cancelVoterModalBtn').addEventListener('click', closeVoterModal);
+
+            document.getElementById('voterForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const originalNik = document.getElementById('editVoterOriginalNik').value;
+                const nik = document.getElementById('voterNik').value.trim();
+                const name = document.getElementById('voterName').value.trim();
+                const rt = document.getElementById('voterRt').value;
+
+                const existingVoter = voters.find(v => v.nik === nik);
+                if (!originalNik && existingVoter) {
+                    showModal("NIK Ganda", "Nomor NIK tersebut sudah terdaftar di DPT.", "error");
+                    return;
+                }
+
+                try {
+                    const voterData = {
+                        nik,
+                        name,
+                        rt,
+                        hasVoted: existingVoter ? existingVoter.hasVoted : false,
+                        votedCandidateId: existingVoter ? existingVoter.votedCandidateId : null
+                    };
+
+                    if (db) {
+                        if (originalNik && originalNik !== nik) {
+                            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'voters', originalNik));
+                        }
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'voters', nik), voterData);
+                    } else {
+                        if (originalNik) {
+                            voters = voters.filter(v => v.nik !== originalNik);
+                        }
+                        voters.push(voterData);
+                        localStorage.setItem('rw07_voters', JSON.stringify(voters));
+                    }
+
+                    closeVoterModal();
+                    renderVotersTable();
+                    showModal("Berhasil", "Data pemilih DPT berhasil disimpan ke cloud.", "check");
+                } catch (err) {
+                    console.error("Error saving voter:", err);
+                }
+            });
+
+            document.getElementById('voterSearchInput').addEventListener('input', renderVotersTable);
+
+            // Initialize Firebase connection on load
+            initFirebase();
+        });
+    </script>
+</body>
+</html>
