@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="id" class="h-full">
 <head>
@@ -492,7 +493,7 @@
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-2">PIN Akses Panitia</label>
-                <input type="password" id="adminPinInput" placeholder="Masukkan PIN (Default: 0707)" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-800 outline-none text-slate-800 text-sm">
+                <input type="password" id="adminPinInput" placeholder="Masukkan PIN Panitia..." class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-slate-800 outline-none text-slate-800 text-sm">
             </div>
             <div class="flex justify-end space-x-3 pt-2">
                 <button type="button" id="cancelAdminLoginBtn" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-sm">Batal</button>
@@ -516,7 +517,7 @@
             </p>
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-2">PIN Akses Panitia</label>
-                <input type="password" id="resetPinInput" placeholder="Masukkan PIN (Default: 0707)" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 outline-none text-slate-800 text-sm">
+                <input type="password" id="resetPinInput" placeholder="Masukkan PIN Panitia..." class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-rose-500 outline-none text-slate-800 text-sm">
             </div>
             <div class="flex justify-end space-x-3 pt-2">
                 <button type="button" id="cancelResetPinBtn" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium text-sm">Batal</button>
@@ -988,7 +989,7 @@
         function verifyAndLoginAdmin() {
             const pin = document.getElementById('adminPinInput').value.trim();
             if (pin !== "0707") {
-                showModal("PIN Salah", "PIN Panitia yang Anda masukkan salah. (Default PIN: 0707)", "error");
+                showModal("PIN Salah", "PIN Panitia yang Anda masukkan salah.", "error");
                 return;
             }
 
@@ -1131,7 +1132,7 @@
         async function verifyAndExecuteReset() {
             const pin = document.getElementById('resetPinInput').value.trim();
             if (pin !== "0707") {
-                showModal("PIN Salah", "PIN Panitia yang Anda masukkan salah untuk verifikasi reset. (Default PIN: 0707)", "error");
+                showModal("PIN Salah", "PIN Panitia yang Anda masukkan salah untuk verifikasi reset.", "error");
                 return;
             }
 
@@ -1479,3 +1480,4 @@
     </script>
 </body>
 </html>
+```
